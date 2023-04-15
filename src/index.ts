@@ -1,13 +1,17 @@
 import express from "express";
 import socket from "socket.io";
-import { Server } from 'socket.io'
+import { Server } from "socket.io";
+import { config } from "dotenv";
+import { router } from './router'
 import http from "http";
-import cors from 'cors'
+import cors from "cors";
 
-const PORT = process.env.PORT || 4000;
 const app = express();
-app.use(cors())
 const httpServer = http.createServer(app);
+config();
+
+app.use(cors());
+app.use(router)
 
 const io = new Server(httpServer, {
   path: "/socket.io",
@@ -28,6 +32,9 @@ io.on("connection", (client: socket.Socket) => {
   });
 });
 
+const PORT = process.env.PORT || 4000;
+
 httpServer.listen(PORT, () => {
+  console.log(process.env.FIREBASE_DATABASE_URL)
   console.log(`Server started at ${PORT}`);
 });
