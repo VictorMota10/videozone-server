@@ -1,0 +1,1 @@
+export const CONSTANT_FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyBuAETTBXSUVq0fAmOxhFMN5fqNwcmxlnc'

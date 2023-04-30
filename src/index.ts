@@ -10,6 +10,7 @@ const app = express();
 const httpServer = http.createServer(app);
 config();
 
+app.use(express.json())
 app.use(cors());
 app.use(router)
 
