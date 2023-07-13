@@ -11,7 +11,7 @@ export class UserController {
 
       const loginRequest = await new signInService().execute(email, password);
 
-      if (loginRequest.success) {
+      if (loginRequest?.success) {
         return response.json(loginRequest);
       } else {
         return response.status(400).json(loginRequest);
@@ -38,15 +38,16 @@ export class UserController {
           created_at: new Date().toLocaleDateString(),
           username: username,
           firebase_uuid: firebase_uuid,
-          avatar_url: "test",
+          avatar_url: request.body.avatar_url || "",
         };
 
         const createdOnPostgres = await new signUpService().createOnPostgres(
           userObject
         );
 
-        return response.json(createdOnPostgres);
-
+        return createdOnPostgres?.success
+          ? response.json(createdOnPostgres)
+          : response.status(400).json(createdOnPostgres);
       } else {
         response.status(400).json(createdOnFirebase);
       }

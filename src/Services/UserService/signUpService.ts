@@ -1,5 +1,6 @@
 import { UserRepository } from "../../Repositories/UserRepository";
 import { auth } from "../../infra/firebase-config";
+import { deleteUser } from "firebase/auth";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { UserInterface } from "../../interface/User";
 
@@ -31,10 +32,14 @@ export class signUpService {
   }
 
   async createOnPostgres(userData: UserInterface) {
-    const userCreated = await new UserRepository().RegisterUser(
-      userData
-    );
+    const createdUser = await new UserRepository().RegisterUser(userData);
 
-    return userCreated
+    if (!createdUser?.success) {
+      if (auth.currentUser) {
+        await deleteUser(auth.currentUser);
+      }
+    }
+
+    return createdUser;
   }
 }

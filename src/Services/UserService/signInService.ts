@@ -1,30 +1,37 @@
+import { UserRepository } from "../../Repositories/UserRepository";
 import { auth } from "../../infra/firebase-config";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 export class signInService {
   async execute(email: string, password: string) {
-    let userData;
+    let userDataFirebase;
     let errorMessage;
-    let success;
+    let successFirebaseLogin;
 
     await signInWithEmailAndPassword(auth, email, password)
       .then(async (userCredential: any) => {
-        userData = userCredential;
-        success = true;
+        userDataFirebase = userCredential;
+        successFirebaseLogin = true;
       })
       .catch((error) => {
         errorMessage = error;
-        success = false;
+        successFirebaseLogin = false;
       });
 
-    return success
-      ? {
-          userData: userData,
-          success: success,
-        }
-      : {
-          errorMessage: errorMessage,
-          success: false,
-        };
+    if (successFirebaseLogin) {
+      const { userDataPostgres }: any = await new UserRepository().GetUserData(
+        email
+      );
+      return {
+        userDataFirebase: userDataFirebase,
+        userDataPostgres,
+        success: successFirebaseLogin,
+      };
+    }
+
+    return {
+      errorMessage: errorMessage,
+      success: false,
+    };
   }
 }

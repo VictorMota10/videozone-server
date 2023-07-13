@@ -1,0 +1,19 @@
+import { Request, Response } from "express";
+import { signInService } from "../Services/UserService/signInService";
+import { signUpService } from "../Services/UserService/signUpService";
+import { UserInterface } from "../interface/User";
+import { FirebaseUserInterface } from "../interface/FirebaseUser";
+import { getInvitesService } from "../Services/InviteService/getInvitesService";
+
+export class InvitesController {
+  async getInvites(request: Request, response: Response) {
+    try {
+      const { uuid } = request.params
+      const invites: any = await new getInvitesService().execute(uuid);
+
+      return response.json(invites);
+    } catch (error) {
+      return response.status(400).json(error);
+    }
+  }
+}
