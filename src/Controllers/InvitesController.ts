@@ -1,8 +1,4 @@
 import { Request, Response } from "express";
-import { signInService } from "../Services/UserService/signInService";
-import { signUpService } from "../Services/UserService/signUpService";
-import { UserInterface } from "../interface/User";
-import { FirebaseUserInterface } from "../interface/FirebaseUser";
 import { getInvitesService } from "../Services/InviteService/getInvitesService";
 
 export class InvitesController {

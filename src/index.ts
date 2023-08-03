@@ -36,6 +36,5 @@ io.on("connection", (client: socket.Socket) => {
 const PORT = process.env.PORT || 4000;
 
 httpServer.listen(PORT, () => {
-  console.log(process.env.FIREBASE_DATABASE_URL)
   console.log(`Server started at ${PORT}`);
 });

@@ -3,6 +3,7 @@ import { signInService } from "../Services/UserService/signInService";
 import { signUpService } from "../Services/UserService/signUpService";
 import { UserInterface } from "../interface/User";
 import { FirebaseUserInterface } from "../interface/FirebaseUser";
+import { TokenExpiredError, sign, verify } from "jsonwebtoken";
 
 export class UserController {
   async signIn(request: Request, response: Response) {
@@ -52,6 +53,40 @@ export class UserController {
         response.status(400).json(createdOnFirebase);
       }
     } catch (error) {
+      return response.status(400).json(error);
+    }
+  }
+
+  async refreshToken(request: Request, response: Response) {
+    try {
+      const { refresh_token }: any = request.headers;
+      const { email, username, uuid } = verify(
+        refresh_token,
+        process.env.TOKEN_HASH || ""
+      ) as {
+        email: string;
+        username: string;
+        uuid: string;
+      };
+
+      const token = sign(
+        {
+          uuid: uuid,
+          email: email,
+          username: username,
+        },
+        process.env.TOKEN_HASH || "",
+        { expiresIn: "24h" }
+      );
+
+      return response.json({
+        token: token,
+      });
+    }
+    catch (error) {
+      if(error instanceof TokenExpiredError){
+        return response.status(401).end()
+      }
       return response.status(400).json(error);
     }
   }

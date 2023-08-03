@@ -1,3 +1,4 @@
+import { sign } from "jsonwebtoken";
 import { UserRepository } from "../../Repositories/UserRepository";
 import { auth } from "../../infra/firebase-config";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -22,7 +23,29 @@ export class signInService {
       const { userDataPostgres }: any = await new UserRepository().GetUserData(
         email
       );
+
+      const refresh_token = sign(
+        {
+          uuid: userDataPostgres?.uuid,
+          email: email,
+          username: userDataPostgres?.username,
+        },
+        process.env.TOKEN_HASH || "",
+        { expiresIn: "72h" }
+      );
+
+      const token = sign(
+        {
+          uuid: userDataPostgres?.uuid,
+          email: email,
+          username: userDataPostgres?.username,
+        },
+        process.env.TOKEN_HASH || "",
+        { expiresIn: "0.1" }
+      );
       return {
+        token: token,
+        refreshToken: refresh_token,
         userDataFirebase: userDataFirebase,
         userDataPostgres,
         success: successFirebaseLogin,

@@ -24,7 +24,7 @@ export class UserRepository {
       }
 
       query =
-        "INSERT INTO public.users(username, email, firebase_user_uuid, created_at, country, birthdate, avatar_url)";
+        "INSERT INTO public.users(username, email, uuid, created_at, country, birthdate, avatar_url)";
       query += " VALUES ($1, $2, $3, $4, $5, $6, $7)";
 
       const params = [
@@ -63,7 +63,7 @@ export class UserRepository {
         port: parseInt(process.env.DB_PORT || ""),
       });
       pool.connect();
-      let query = "SELECT username, country, avatar_url, birthdate, id FROM public.users WHERE email = $1 LIMIT 1";
+      let query = "SELECT username, country, avatar_url, birthdate, uuid, id FROM public.users WHERE email = $1 LIMIT 1";
       const userDataPostgres = await pool
         .query(query, [email])
         .then((res) => {
