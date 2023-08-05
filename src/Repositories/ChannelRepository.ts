@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import { CreateChannelPayload } from "../interface/Channel";
+import { ChannelResponseProps, CreateChannelPayload } from "../interface/Channel";
 
 export class ChannelRepository {
   async createChannel(channelData: CreateChannelPayload, creator_uuid: string) {
@@ -36,6 +36,36 @@ export class ChannelRepository {
       pool.end();
 
       return id;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async listChannels(uid: string) {
+    try {
+      const pool = new Pool({
+        user: process.env.DB_USER,
+        host: process.env.DB_HOST,
+        database: process.env.DATABASE,
+        password: process.env.DB_PASSWORD,
+        port: parseInt(process.env.DB_PORT || ""),
+      });
+      pool.connect();
+
+      let query =
+        "SELECT id, name, logo_url, description, created_at from public.channel WHERE user_owner_uuid = $1";
+
+      const params = [
+        uid
+      ];
+
+      const ChannelList: ChannelResponseProps[] | [] = await pool.query(query, params).then((res: any) => {
+        return res.rows;
+      });
+
+      pool.end();
+
+      return ChannelList || []
     } catch (error) {
       console.log(error);
     }

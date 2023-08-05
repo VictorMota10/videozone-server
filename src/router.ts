@@ -16,11 +16,19 @@ router.get("/", (request: Request, response: Response) => {
   return response.json({ message: "API is running..." });
 });
 
+// Videos
 router.get("/videos", videoController.getDiscoveredVideos);
+
+// Auth
 router.post("/sign-in", userController.signIn);
 router.post("/sign-up", userController.signUp);
 router.post("/refresh-token", userController.refreshToken);
+
+// Invites
 router.get("/invites/:uuid", authToken, inviteController.getInvites);
-router.post("/create-channel", authToken, channelController.createChannel);
+
+// Channel
+router.post("/channel/create", authToken, channelController.createChannel);
+router.get("/channel/list", authToken, channelController.listChannelsOfUser);
 
 export { router };
