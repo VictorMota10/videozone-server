@@ -1,12 +1,7 @@
 import { realtime_db } from "../../infra/firebase-config";
 import {
-  child,
   get,
-  goOffline,
-  goOnline,
   ref,
-  remove,
-  set,
 } from "firebase/database";
 import { FIREBASE_COLLECTIONS } from "../../utils/databaseSchema";
 

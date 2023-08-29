@@ -30,5 +30,6 @@ router.get("/invites/:uuid", authToken, inviteController.getInvites);
 // Channel
 router.post("/channel/create", authToken, channelController.createChannel);
 router.get("/channel/list", authToken, channelController.listChannelsOfUser);
+router.get("/channel/managment/:channel_id", authToken, channelController.getChannelManagmentInfo);
 
 export { router };

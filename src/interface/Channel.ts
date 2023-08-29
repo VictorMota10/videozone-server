@@ -1,21 +1,36 @@
-export interface CreateChannelPayload {
-    name: string
-    imageUrl: string
-    description: string
-}
+import { VideoResponseProps } from "./Video";
 
-export interface ChannelResponseProps {
-    id: string
-    name: string
-    logo_url: string
-    description: string
-    created_at: string
+export interface CreateChannelPayload {
+  name: string;
+  imageUrl: string;
+  description: string;
 }
 
 export interface ChannelProps {
-    id: string
-    name: string
-    imageUrl: string
-    description: string
-    createdAt: string
+  id: string;
+  name: string;
+  imageUrl: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface ManagmentChannelResponseProps {
+  channelData: ChannelData | undefined;
+  videos: VideoResponseProps[] | undefined;
+}
+
+export interface ChannelData {
+  id: string;
+  name: string;
+  logo_url: string;
+  description: string;
+  created_at: string;
+  followers: any;
+}
+
+export interface ManagmentDashboardData {
+  countViews: number;
+  countLikes: number;
+  countDislikes: number;
+  countVideos: number;
 }

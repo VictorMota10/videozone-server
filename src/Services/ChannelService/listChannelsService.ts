@@ -1,27 +1,13 @@
 import { ChannelRepository } from "../../Repositories/ChannelRepository";
-import { ChannelProps, ChannelResponseProps } from "../../interface/Channel";
+import { ChannelData } from "../../interface/Channel";
 
 export class listChannelsService {
-  async execute(
-    uid: string,
-  ) {
+  async execute(uid: string) {
     try {
-      const ChannelList: ChannelResponseProps[] | undefined = await new ChannelRepository().listChannels(uid);
-      const formatedChannelList: ChannelProps[] | [{}] = []
+      const ChannelList: ChannelData[] | undefined =
+        await new ChannelRepository().listChannels(uid);
 
-      if(ChannelList && ChannelList?.length > 0){
-        ChannelList.forEach((channel: ChannelResponseProps, index: number) => {
-            formatedChannelList.push({
-                id: channel.id,
-                name: channel.name,
-                imageUrl: channel.logo_url,
-                description: channel.description,
-                createdAt: channel.created_at
-            })
-        })
-      }
-
-      return formatedChannelList;
+      return ChannelList;
     } catch (error) {
       return error;
     }
