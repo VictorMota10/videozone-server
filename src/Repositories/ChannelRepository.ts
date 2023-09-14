@@ -15,15 +15,17 @@ export class ChannelRepository {
       pool.connect();
 
       let query =
-        "INSERT INTO channel(user_owner_uuid, name, logo_url, description, created_at)";
-      query += " VALUES ($1, $2, $3, $4, $5)";
+        "INSERT INTO channel(user_owner_uuid, name, logo_url, description, tag_name, created_at)";
+      query += " VALUES ($1, $2, $3, $4, $5, $6)";
 
       const params = [
         creator_uuid,
         channelData.name,
         channelData.imageUrl,
         channelData.description,
+        channelData.tagName,
         new Date().toUTCString(),
+
       ];
 
       await pool.query(query, params).then((res) => {
@@ -96,34 +98,9 @@ export class ChannelRepository {
           return res.rows[0];
         });
 
-      let responseObject: ManagmentChannelResponseProps = {
-        channelData: undefined,
-        videos: undefined
-      };
-
-      if (channelData.id) {
-        query =
-          "SELECT video_url, thumbnail_url, create_at, views, likes, dislikes, title";
-        query += " FROM public.videos";
-        query += " WHERE channel_id = $1";
-
-        let params = [channel_id];
-
-        const videos: VideoResponseProps[] = await pool
-          .query(query, params)
-          .then((res: any) => {
-            return res.rows;
-          });
-
-        responseObject = {
-          channelData: channelData,
-          videos: videos,
-        };
-      }
-
       pool.end();
 
-      return responseObject;
+      return channelData;
     } catch (error) {
       console.log(error);
     }

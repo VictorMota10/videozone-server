@@ -1,13 +1,26 @@
 import { Request, Response } from "express";
 import { createChannelService } from "../Services/ChannelService/createChannelService";
 import { listChannelsService } from "../Services/ChannelService/listChannelsService";
-import { ChannelProps } from "../interface/Channel";
+import { ChannelProps, ManagmentDashboardData } from "../interface/Channel";
 import { getChannelManagmentService } from "../Services/ChannelService/getChannelManagmentService";
+import { VideoResponseProps } from "../interface/Video";
+import { getVideoChannelService } from "../Services/VideoService/getVideosChannelService";
+import { validatorRequired } from "../utils/validatorRequired";
+import { responseErrorGenerator } from "../utils/responseErrorGenerator";
 
 export class ChannelController {
   async createChannel(request: Request, response: Response) {
     try {
-      const { name, imageUrl, description } = request.body;
+      const { name, imageUrl, description, tagName } = request.body;
+
+      const validation = validatorRequired(request.body, ["name"]);
+
+      console.log(validation);
+
+      if (!validation.success) {
+        throw new Error(validation.failedMessage);
+      }
+
       const authToken: string = request.headers.authorization || "";
       const [, token] = authToken.split(" ");
 
@@ -15,12 +28,13 @@ export class ChannelController {
         name,
         imageUrl,
         description,
-        token
+        token,
+        tagName
       );
 
       return response.json(channelCreated);
-    } catch (error) {
-      return response.status(400).json(error);
+    } catch (error: any) {
+      return response.status(400).json(responseErrorGenerator(error, 400));
     }
   }
 
@@ -52,12 +66,24 @@ export class ChannelController {
           .status(400)
           .json({ message: "Channel ID of user must be sent" });
 
-      const managmentChannelData: any = await new getChannelManagmentService().execute(
-        token,
-        channel_id
-      );
+      const managmentChannelData: any =
+        await new getChannelManagmentService().execute(token, channel_id);
 
-      return response.json(managmentChannelData);
+      if (managmentChannelData) {
+        const videosOfChannel: VideoResponseProps[] =
+          (await new getVideoChannelService().execute(
+            channel_id
+          )) as VideoResponseProps[];
+
+        const responseObject = {
+          channelData: managmentChannelData,
+          videos: videosOfChannel,
+        };
+
+        return response.json(responseObject);
+      }
+
+      return response.status(400).json("Channel not found");
     } catch (error) {
       return response.status(400).json(error);
     }

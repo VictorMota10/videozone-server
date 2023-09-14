@@ -6,4 +6,5 @@ export interface VideoResponseProps {
   likes: string;
   dislikes: string;
   title: string;
+  video_uuid_firebase: string
 }

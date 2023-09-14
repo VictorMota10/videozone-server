@@ -4,6 +4,7 @@ export interface CreateChannelPayload {
   name: string;
   imageUrl: string;
   description: string;
+  tagName: string;
 }
 
 export interface ChannelProps {
@@ -21,6 +22,7 @@ export interface ManagmentChannelResponseProps {
 
 export interface ChannelData {
   id: string;
+  tag_name: string;
   name: string;
   logo_url: string;
   description: string;

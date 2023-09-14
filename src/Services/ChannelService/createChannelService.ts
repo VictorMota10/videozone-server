@@ -6,7 +6,8 @@ export class createChannelService {
     name: string,
     imageUrl: string,
     description: string,
-    token: string
+    token: string,
+    tagName: string
   ) {
     try {
       const { uuid } = verify(token, process.env.TOKEN_HASH || "") as {
@@ -16,6 +17,7 @@ export class createChannelService {
         name: name,
         imageUrl: imageUrl,
         description: description,
+        tagName: tagName
       };
 
       const channelCreated = await new ChannelRepository().createChannel(
