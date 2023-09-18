@@ -1,3 +1,3 @@
 export const FIREBASE_COLLECTIONS = {
-  VIDEOS: 'videos'
+  VIDEOS_UPLOAD: 'videos_upload'
 }

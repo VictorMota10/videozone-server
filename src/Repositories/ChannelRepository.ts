@@ -15,7 +15,7 @@ export class ChannelRepository {
       pool.connect();
 
       let query =
-        "INSERT INTO channel(user_owner_uuid, name, logo_url, description, tag_name, created_at)";
+        "INSERT INTO public.channel(user_owner_uuid, name, logo_url, description, tag_name, created_at)";
       query += " VALUES ($1, $2, $3, $4, $5, $6)";
 
       const params = [

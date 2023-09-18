@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "videozone-streaming",
+  "private_key_id": "8c4963218370e5a8a7e9ac6596e14feacc155f23",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDG9EmdjjhlG7DP\nYzufqDcvUSbgMVnwfJfu+xYbO5r6C2un823ZWz+gVjA465gHiI7cSYOTWkdmlz2Q\nIGBdSJwrRKLq5A9eRXCxqy2mEONxJDMzmgfQMSkv6lRUnUoThuWmdBHVrqpxbU3g\nS6P+2nAxH0z9wKScFIu06Kkr+jriJsFQjWCeDdNjAOvLWh5YgedFLnGucQo7TAvc\n28/Jhx8nbAG8wo0Gp4eRGIOnpGCsMnrODTZxQ1fNLfqSNTx6KUZj6R8rpnU81plL\nGwx1vAEqoi8HVUbtiRSFMNHMR5IWaWZtbb+e27rV3rjanImBGRVCsrp1i0o7VsS9\ndFGFKj8nAgMBAAECggEAPT90MDhZvSqmplmuv8pp3ru1Y5xdy06X+V674ftaDPMa\nG9SxcxIHxuTxqHxCy8Lq8/7/rgvDYl5Z+fY1pFIXnaxeGUDHSGbJODDx9ydI1Ypm\n5tJa6GlR/Cm/92KKrPNA3Jrr6KQCXbPgHxY6MNlvY3f23EGDi3c5wSJE/kBlAzyO\n/KRvtFf3x76XRHc4h6BDPbutoxpk8iZvAPiLZegoP+agQcp6U3HwKgl+XlpYE45P\nEybLSPZjVDE5Tg+hJBuBIdSaQ9cOKQfXI7+Gb3rUwAOUtsg7SVt+kjSbRFtqife8\n8DmbkwmM/F6twM5kBd/3bqzW9dLj7VaUTusyBT3PrQKBgQDr4+FFf6prgm4VKl8E\nqsa1A8e8cri59KZUF2e0Ilz8dkK6k0bMTXythAMtuR+MOvODwYGAwEhaNZYw6VAD\nfTt8I2gOAShqSjWdcUq1YbTS9eEqzlazV9xs8XHfFjyg2jJjTDMM8rhx9Hvv+lBW\nltP48NU/apgOhwrlP1gbLtJL2wKBgQDX6k9cMf12qcXdnPvs1SA0v7SClTtRJqKo\nbpLd8tuquFT4KDyoMNZMrKXFmAYgz3EQhaEAidiu4IbSsmGJg3igVKt4qWgVxSV2\nwiW7g+aK13GYZWsJzCMNqUN7QRONirqRxRIsRBbZeZpvgPjoB5ZVSkE+VPIoaIUG\n95DkPhKBpQKBgQCBBLmgrowCk2ssTml7/wAB35huXPzmUIZstgR1hNoBB5nFvGnb\nsoH/0ZV/e6Jiq5enN75iMkkgdfC4vdOSpPtVEXSHPGDjicU7YMyw2kjxnaRTKlpH\na0XXnFNg5iOxAsbOgs3lRhhV05e6ENnCEmrL3MV2ExIp1/jAnF3POFOzQwKBgQC+\nYemGFsIyrrI8nZ55jtduC5ekCOgbvyBvucggknLlDtJFWl1ZxG5Bf35QQ6MrrR45\n/kofymxYjrvy7r0YXuevH9ludJnFkGdfVwOkW0KeLCgKw2plYi2KbzSEarZN+QRX\nYliK1aL8McBeD2/qUD5biDUNPCOmQ7sAkKyexKjWzQKBgCRXhDrtvOY3VWpYo9Yo\nO2UbsaKefxMB8UOSUn/HwsaiJdtjCEvkRiCqKCMFCD8eqRvn3YauuJvwxEEdbGlb\nrISNHKKrbJ+wzf9/UatCq1PNTBNINLukkNoIkglB7rsWzKTxIMc4D6RdXqeYD3cY\nJHZeSk0RoKH+YVapMaCJUBXd\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-s2wqr@videozone-streaming.iam.gserviceaccount.com",
+  "client_id": "108743394780948690192",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-s2wqr%40videozone-streaming.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

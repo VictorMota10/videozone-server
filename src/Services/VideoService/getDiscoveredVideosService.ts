@@ -1,6 +1,3 @@
-import { realtime_db } from "../../infra/firebase-config";
-import { get, ref } from "firebase/database";
-import { FIREBASE_COLLECTIONS } from "../../utils/databaseSchema";
 import { VideoRepository } from "../../Repositories/VideoRepository";
 import { VideoResponseProps } from "../../interface/Video";
 

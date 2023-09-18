@@ -2,17 +2,18 @@ import express from "express";
 import socket from "socket.io";
 import { Server } from "socket.io";
 import { config } from "dotenv";
-import { router } from './router'
+import { router } from "./router";
 import http from "http";
 import cors from "cors";
+
 
 const app = express();
 const httpServer = http.createServer(app);
 config();
 
-app.use(express.json())
+app.use(express.json());
 app.use(cors());
-app.use(router)
+app.use(router);
 
 const io = new Server(httpServer, {
   path: "/socket.io",
