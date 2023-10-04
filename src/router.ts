@@ -82,11 +82,8 @@ router.get("/", (request: Request, response: Response) => {
 });
 
 // Videos
-router.get(
-  "/videos",
-
-  videoController.getDiscoveredVideos
-);
+router.get("/videos", videoController.getDiscoveredVideos);
+router.get("/video/url/:uuid", videoController.getUrlByUuid);
 router.post("/video/upload", uploadMiddleware, videoController.uploadNewVideo);
 
 // Auth

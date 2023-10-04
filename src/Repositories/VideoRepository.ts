@@ -98,14 +98,21 @@ export class VideoRepository {
         UPLOAD_STATUS.uploading,
       ];
 
-      await pool.query(query, params).then((res) => {
-        console.log("cria no postgres...");
-        return res.rows[0];
-      });
+      const queryResult = await pool
+        .query(query, params)
+        .then(() => {
+          return true;
+        })
+        .catch((err) => {
+          console.log(err);
+          return false;
+        });
 
       pool.end();
 
-      return;
+      return {
+        success: queryResult,
+      };
     } catch (error) {
       console.log(error);
     }
@@ -145,6 +152,37 @@ export class VideoRepository {
       pool.end();
 
       return;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async getVideoByUuid(uuid: string) {
+    try {
+      const pool = new Pool({
+        user: process.env.DB_USER,
+        host: process.env.DB_HOST,
+        database: process.env.DATABASE,
+        password: process.env.DB_PASSWORD,
+        port: parseInt(process.env.DB_PORT || ""),
+      });
+      pool.connect();
+
+      let query =
+        "SELECT CH.name as author, V.video_url, V.thumbnail_url, V.create_at, V.views, V.likes, V.dislikes, V.title, V.video_uuid_firebase, V.channel_id from public.Videos as V ";
+        query += "INNER JOIN public.channel as CH "
+        query += "ON CH.id = V.channel_id "
+        query += "WHERE video_uuid_firebase = $1 "
+
+      const params = [uuid];
+
+      const videoData = await pool.query(query, params).then((res) => {
+        return res.rows[0];
+      });
+
+      pool.end();
+
+      return {...videoData};
     } catch (error) {
       console.log(error);
     }

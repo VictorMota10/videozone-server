@@ -4,23 +4,20 @@ export default {
   key: "VideoUpload",
   async handle({ data }: { data: any }) {
     try {
+      const { uuid } = data.data;
       await new uploadVideoService()
-        .createVideoOnPostgres(data.uuidVideo, data.data)
-        .then( async () => {
+        .execute(uuid, data.files[0])
+        .then(async (url: any) => {
           await new uploadVideoService()
-            .execute(data.uuidVideo, data.files[0])
-            .then(async (url: any) => {
-              await new uploadVideoService()
-                .saveThumbFirebase(data.files[1], data.uuidVideo)
-                .then(async (UrlThumbInFirebase: any) => {
-                  await new uploadVideoService().updateUrlPostgres(
-                    data.uuidVideo,
-                    url,
-                    UrlThumbInFirebase,
-                  );
+            .saveThumbFirebase(data.files[1], uuid)
+            .then(async (UrlThumbInFirebase: any) => {
+              await new uploadVideoService().updateUrlPostgres(
+                uuid,
+                url,
+                UrlThumbInFirebase
+              );
 
-                  return;
-                });
+              return;
             });
         });
 

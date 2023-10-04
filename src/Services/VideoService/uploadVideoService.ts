@@ -66,8 +66,8 @@ export class uploadVideoService {
   }
 
   async createVideoOnPostgres(uuidVideo: string, data: any) {
-    await new VideoRepository().createVideoUploaded(uuidVideo, data);
-    return;
+    const successCreate = await new VideoRepository().createVideoUploaded(uuidVideo, data);
+    return successCreate;
   }
 
   async updateUrlPostgres(
