@@ -7,7 +7,6 @@ export const validatorRequired = (object: any, arrayFields: Array<string>) => {
     }
   });
 
-  console.log(fieldsMissing);
   if (fieldsMissing.length > 0) {
     return {
       success: false,

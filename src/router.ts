@@ -8,6 +8,7 @@ import { UserController } from "./Controllers/UserController";
 import { InvitesController } from "./Controllers/InvitesController";
 import { authToken } from "./Middleware/authToken";
 import { ChannelController } from "./Controllers/ChannelController";
+import { SessionController } from "./Controllers/SessionController";
 
 const router = Router();
 
@@ -15,6 +16,7 @@ const videoController = new VideoController();
 const userController = new UserController();
 const inviteController = new InvitesController();
 const channelController = new ChannelController();
+const sessionController = new SessionController();
 
 const maxSize = 1000 * 1024 * 1024;
 
@@ -83,7 +85,7 @@ router.get("/", (request: Request, response: Response) => {
 
 // Videos
 router.get("/videos", videoController.getDiscoveredVideos);
-router.get("/video/url/:uuid", videoController.getUrlByUuid);
+router.get("/video/:uuid", videoController.getByUuid);
 router.post("/video/upload", uploadMiddleware, videoController.uploadNewVideo);
 
 // Auth
@@ -102,5 +104,8 @@ router.get(
   authToken,
   channelController.getChannelManagmentInfo
 );
+
+// Sessão
+router.post("/session/create", authToken, sessionController.createSession);
 
 export { router };

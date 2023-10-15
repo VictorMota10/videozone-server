@@ -1,6 +1,6 @@
 export const responseErrorGenerator = (error: any, statusCode: number) => {
   return {
-    message: error?.message,
+    message: error?.message ?? error,
     statusCode: statusCode,
   };
 };

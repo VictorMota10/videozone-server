@@ -53,7 +53,7 @@ export class VideoRepository {
       pool.connect();
 
       let query =
-        "SELECT V.video_url, V.thumbnail_url, V.create_at, V.views, V.likes, V.dislikes, V.title, V.video_uuid_firebase, V.channel_id, CH.logo_url, CH.tag_name";
+        "SELECT V.video_url, V.thumbnail_url, V.create_at, V.views, V.likes, V.dislikes, V.title, V.video_uuid_firebase, V.channel_id, CH.name as author, CH.logo_url, CH.tag_name";
       query += " FROM public.videos as V";
       query += " INNER JOIN public.channel as CH";
       query += " ON CH.id = V.channel_id";
@@ -169,10 +169,10 @@ export class VideoRepository {
       pool.connect();
 
       let query =
-        "SELECT CH.name as author, V.video_url, V.thumbnail_url, V.create_at, V.views, V.likes, V.dislikes, V.title, V.video_uuid_firebase, V.channel_id from public.Videos as V ";
-        query += "INNER JOIN public.channel as CH "
-        query += "ON CH.id = V.channel_id "
-        query += "WHERE video_uuid_firebase = $1 "
+        "SELECT CH.name as author, CH.logo_url as channel_logo, V.video_url, V.thumbnail_url, V.create_at, V.views, V.likes, V.dislikes, V.title, V.description, V.video_uuid_firebase, V.channel_id from public.Videos as V ";
+      query += "INNER JOIN public.channel as CH ";
+      query += "ON CH.id = V.channel_id ";
+      query += "WHERE video_uuid_firebase = $1 ";
 
       const params = [uuid];
 
@@ -182,7 +182,7 @@ export class VideoRepository {
 
       pool.end();
 
-      return {...videoData};
+      return { ...videoData };
     } catch (error) {
       console.log(error);
     }

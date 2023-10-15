@@ -15,8 +15,6 @@ export class ChannelController {
 
       const validation = validatorRequired(request.body, ["name"]);
 
-      console.log(validation);
-
       if (!validation.success) {
         throw new Error(validation.failedMessage);
       }

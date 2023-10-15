@@ -38,7 +38,7 @@ export class VideoController {
     return response.json("Starting upload");
   }
 
-  async getUrlByUuid(request: Request, response: Response) {
+  async getByUuid(request: Request, response: Response) {
     const { uuid }: any = request.params;
 
     if(!uuid) response.status(400).json('uuid must be sent');
