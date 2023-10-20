@@ -107,5 +107,15 @@ router.get(
 
 // Sessão
 router.post("/session/create", authToken, sessionController.createSession);
+router.post(
+  "/session/inactivate",
+  authToken,
+  sessionController.inactivateSession
+);
+router.get(
+  "/session/:session_uuid",
+  authToken,
+  sessionController.getSessionData
+);
 
 export { router };

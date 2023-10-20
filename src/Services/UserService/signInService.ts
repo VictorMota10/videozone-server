@@ -41,7 +41,7 @@ export class signInService {
           username: userDataPostgres?.username,
         },
         process.env.TOKEN_HASH || "",
-        { expiresIn: "24h" }
+        { expiresIn: "120h" }
       );
       return {
         token: token,
