@@ -16,10 +16,21 @@ export class joinSessionService {
 
       const userUUID = uuid;
 
+      const canJoin = await new SessionRepository().verifyUserCanJoin(
+        sessionUUID,
+        userUUID
+      );
+
+      if (!canJoin) {
+        throw Error("Você não pode entrar em uma sessão que foi removido");
+      }
+
       const joinSession: any = await new SessionRepository().joinSession(
         userUUID,
         sessionUUID
       );
+
+      io.socketsJoin(joinSession?.socket_room_uuid);
 
       if (!joinSession?.already_joined) {
         io.to(joinSession?.socket_room_uuid).emit(
@@ -27,15 +38,15 @@ export class joinSessionService {
           {
             uuid,
             username,
+            creator: false,
+            avatar_url: joinSession?.avatar_url || undefined,
           }
         );
       }
 
-      io.socketsJoin(joinSession?.socket_room_uuid);
-
       return joinSession;
-    } catch (error) {
-      return error;
+    } catch (error: any) {
+      throw new Error(error?.message);
     }
   }
 }

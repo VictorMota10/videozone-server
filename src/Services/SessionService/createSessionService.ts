@@ -1,9 +1,8 @@
 import { verify } from "jsonwebtoken";
 import { v4 as uuidV4 } from "uuid";
 
-import { io } from '../../index'
+import { io } from "../../index";
 import { SessionRepository } from "../../Repositories/SessionRepository";
-
 
 export class createSessionService {
   async execute(
@@ -33,8 +32,8 @@ export class createSessionService {
         sessionDataCreate
       );
 
-      if(sessionData){
-        io.socketsJoin(socket_room_uuid)
+      if (sessionData?.success) {
+        io.socketsJoin(socket_room_uuid);
       }
 
       return sessionData;

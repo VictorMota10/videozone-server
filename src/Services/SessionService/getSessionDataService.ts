@@ -15,4 +15,19 @@ export class getSessionDataService {
       return error;
     }
   }
+
+  async exists(
+    sessionUUID: string,
+  ) {
+    try {
+
+      let sessionData: any = await new SessionRepository().sessionExists(
+        sessionUUID
+      );
+
+      return sessionData;
+    } catch (error) {
+      return error;
+    }
+  }
 }

@@ -7,6 +7,7 @@ import { getSessionDataService } from "../Services/SessionService/getSessionData
 import { joinSessionService } from "../Services/SessionService/joinSessionService";
 
 import { v4 as uuidv4 } from "uuid";
+import { removeUserSessionService } from "../Services/SessionService/removeUserService";
 
 export class SessionController {
   async createSession(request: Request, response: Response) {
@@ -25,7 +26,7 @@ export class SessionController {
       const authToken: string = request.headers.authorization || "";
       const [, token] = authToken.split(" ");
 
-      let socket_room_uuid = uuidv4()
+      let socket_room_uuid = uuidv4();
 
       const sessionCreated: any = await new createSessionService().execute(
         title,
@@ -65,24 +66,45 @@ export class SessionController {
       const authToken: string = request.headers.authorization || "";
       const [, token] = authToken.split(" ");
 
-      const sessionData: any = await new getSessionDataService().execute(
+      const sessionExists: any = await new getSessionDataService().exists(
         session_uuid
       );
+
+      if (!sessionExists) {
+        return response.status(404).json({
+          error: "Sessão não encontrada...",
+        });
+      }
 
       const joinSession: any = await new joinSessionService().execute(
         token,
         session_uuid
       );
 
-      if (!sessionData) {
-        return response.status(404).json({
-          error: "Sessão não encontrada...",
-        });
-      }
+      const data: any = await new getSessionDataService().execute(session_uuid);
 
       if (joinSession) {
-        return response.json(sessionData);
+        return response.json(data);
       }
+    } catch (error: any) {
+      return response.status(400).json(responseErrorGenerator(error, 400));
+    }
+  }
+
+  async removeUserSession(request: Request, response: Response) {
+    try {
+      const { session_uuid, user_uuid } = request.body;
+
+      const authToken: string = request.headers.authorization || "";
+      const [, token] = authToken.split(" ");
+
+      const removedUser: any = await new removeUserSessionService().execute(
+        session_uuid,
+        user_uuid,
+        token
+      );
+
+      return response.json(removedUser);
     } catch (error: any) {
       return response.status(400).json(responseErrorGenerator(error, 400));
     }

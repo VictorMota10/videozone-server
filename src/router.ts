@@ -117,5 +117,10 @@ router.get(
   authToken,
   sessionController.getSessionData
 );
+router.put(
+  "/session/remove",
+  authToken,
+  sessionController.removeUserSession
+);
 
 export { router };

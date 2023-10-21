@@ -226,7 +226,7 @@ export class SessionRepository {
       pool.connect();
 
       let query =
-        "SELECT SA.session_uuid, SA.currently_video_uuid, SA.title, SA.description, SA.created_at, SA.creator_user_uuid, V.video_url, C.name, C.logo_url from public.sessions_active SA";
+        "SELECT SA.session_uuid, SA.currently_video_uuid, SA.title, SA.description, SA.created_at, SA.creator_user_uuid, V.video_url, C.name, C.logo_url FROM public.sessions_active SA";
       query += " INNER JOIN public.videos V";
       query += " ON V.video_uuid_firebase = SA.currently_video_uuid";
       query += " INNER JOIN public.channel C";
@@ -235,7 +235,7 @@ export class SessionRepository {
 
       let params = [sessionUUID];
 
-      const response = await pool
+      const sessionData = await pool
         .query(query, params)
         .then((res) => {
           return res.rows[0];
@@ -244,7 +244,27 @@ export class SessionRepository {
           throw new Error(err);
         });
 
+      query =
+        "SELECT U.uuid, U.username, U.avatar_url, SV.creator from public.sessions_viewers SV ";
+      query += "INNER JOIN public.users U ";
+      query += "ON U.uuid = SV.user_uuid ";
+      query += "WHERE SV.session_uuid = $1 ";
+
+      const viewers = await pool
+        .query(query, params)
+        .then((res) => {
+          return res.rows;
+        })
+        .catch((err) => {
+          throw new Error(err);
+        });
+
       pool.end();
+
+      const response = {
+        sessionData,
+        viewers,
+      };
 
       return response || undefined;
     } catch (error) {
@@ -310,10 +330,25 @@ export class SessionRepository {
             throw new Error(err);
           });
 
+        query = "SELECT U.avatar_url FROM public.users U ";
+        query += "WHERE U.uuid = $1 ";
+
+        params = [userUUID];
+
+        const avatarUrl = await pool
+          .query(query, params)
+          .then((res) => {
+            return res.rows[0];
+          })
+          .catch((err) => {
+            throw new Error(err);
+          });
+
         return {
           success: true,
           socket_room_uuid: sessionData[0].socket_room_uuid,
           already_joined: false,
+          avatar_url: avatarUrl?.avatar_url,
         };
       }
 
@@ -324,6 +359,187 @@ export class SessionRepository {
         already_joined: true,
         socket_room_uuid: sessionData[0].socket_room_uuid,
       };
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
+  }
+
+  async sessionExists(sessionUUID: string) {
+    try {
+      const pool = new Pool({
+        user: process.env.DB_USER,
+        host: process.env.DB_HOST,
+        database: process.env.DATABASE,
+        password: process.env.DB_PASSWORD,
+        port: parseInt(process.env.DB_PORT || ""),
+      });
+      pool.connect();
+
+      let query =
+        "SELECT session_uuid FROM public.sessions_active WHERE session_uuid = $1 ";
+
+      let params = [sessionUUID];
+
+      const exists = await pool
+        .query(query, params)
+        .then((res) => {
+          return res.rows[0];
+        })
+        .catch((err) => {
+          throw new Error(err);
+        });
+
+      pool.end();
+
+      if (!exists) {
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
+  }
+
+  async removeUserSession(session_uuid: string, user_uuid: string) {
+    try {
+      const pool = new Pool({
+        user: process.env.DB_USER,
+        host: process.env.DB_HOST,
+        database: process.env.DATABASE,
+        password: process.env.DB_PASSWORD,
+        port: parseInt(process.env.DB_PORT || ""),
+      });
+      pool.connect();
+
+      let query = "SELECT socket_room_uuid FROM public.sessions_viewers ";
+      query +=
+        "WHERE session_uuid = $1 AND user_uuid = $2 AND creator = 'false' ";
+
+      let params = [session_uuid, user_uuid];
+
+      const sessionData = await pool
+        .query(query, params)
+        .then((res) => {
+          return res.rows[0];
+        })
+        .catch((err) => {
+          throw new Error(err);
+        });
+
+      query = "DELETE FROM public.sessions_viewers ";
+      query +=
+        "WHERE session_uuid = $1 AND user_uuid = $2 AND creator = 'false' ";
+
+      params = [session_uuid, user_uuid];
+
+      const removed = await pool
+        .query(query, params)
+        .then(() => {
+          return true;
+        })
+        .catch((err) => {
+          throw new Error(err);
+        });
+
+      if (removed) {
+        query =
+          "INSERT INTO public.black_list_sessions_viewers(session_uuid, user_uuid) ";
+        query +=
+          "SELECT $1, $2 WHERE NOT EXISTS ( SELECT session_uuid, user_uuid FROM public.black_list_sessions_viewers WHERE session_uuid = $3 AND user_uuid = $4 ) ";
+
+        params = [session_uuid, user_uuid, session_uuid, user_uuid];
+
+        const response = await pool
+          .query(query, params)
+          .then(() => {
+            return {
+              success: true,
+              socket_room_uuid: sessionData?.socket_room_uuid,
+            };
+          })
+          .catch((err) => {
+            throw new Error(err);
+          });
+
+        return response;
+      }
+
+      pool.end();
+
+      return {
+        success: false,
+      };
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async validateCreatorSession(session_uuid: string, user_uuid: string) {
+    try {
+      const pool = new Pool({
+        user: process.env.DB_USER,
+        host: process.env.DB_HOST,
+        database: process.env.DATABASE,
+        password: process.env.DB_PASSWORD,
+        port: parseInt(process.env.DB_PORT || ""),
+      });
+      pool.connect();
+
+      let query = "SELECT creator FROM public.sessions_viewers ";
+      query +=
+        "WHERE session_uuid = $1 AND user_uuid = $2 AND creator = 'true' ";
+
+      let params = [session_uuid, user_uuid];
+
+      const sessionData = await pool
+        .query(query, params)
+        .then((res) => {
+          return res.rows[0];
+        })
+        .catch((err) => {
+          throw new Error(err);
+        });
+
+      pool.end();
+
+      return sessionData?.creator;
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
+  }
+
+  async verifyUserCanJoin(session_uuid: string, user_uuid: string) {
+    try {
+      const pool = new Pool({
+        user: process.env.DB_USER,
+        host: process.env.DB_HOST,
+        database: process.env.DATABASE,
+        password: process.env.DB_PASSWORD,
+        port: parseInt(process.env.DB_PORT || ""),
+      });
+      pool.connect();
+
+      let query = "SELECT * FROM public.black_list_sessions_viewers ";
+      query += "WHERE session_uuid = $1 AND user_uuid = $2 ";
+
+      let params = [session_uuid, user_uuid];
+
+      const sessionBlackList = await pool
+        .query(query, params)
+        .then((res) => {
+          return res.rows;
+        })
+        .catch((err) => {
+          throw new Error(err);
+        });
+
+      pool.end();
+
+      return sessionBlackList?.length === 0;
     } catch (error) {
       console.error(error);
       return error;
