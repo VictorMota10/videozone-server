@@ -6,6 +6,7 @@ import { router } from "./router";
 import { instrument } from "@socket.io/admin-ui";
 import http from "http";
 import cors from "cors";
+import { socketEvents } from "./utils/events.map";
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -18,8 +19,8 @@ app.use(router);
 const io = new Server(httpServer, {
   cors: {
     origin: ["https://admin.socket.io", "http://localhost:3000"],
-    credentials: true
-  }
+    credentials: true,
+  },
 });
 
 instrument(io, {
@@ -28,11 +29,24 @@ instrument(io, {
 
 const clients: Array<socket.Socket> = [];
 
-io.on("connection", (client: socket.Socket) => {
+io.on("connection", (client: any) => {
   clients.push(client);
 
+  client.on(socketEvents.askVideoTime, (data: any) => {
+    io.to(data?.to).emit(socketEvents.whatTimeVideo, {
+      sender: data?.sender,
+    });
+  });
+
+  client.on(socketEvents.responseTimeVideo, (data: any) => {
+    io.to(data.to).emit(socketEvents.currentTimeOfVideo, {
+      current_time: data.current_time,
+    });
+  });
+
   client.on("disconnect", () => {
-    clients.splice(clients.indexOf(client), 1);
+    console.log("disconnect: ", client.id);
+    delete clients[client.id];
   });
 });
 

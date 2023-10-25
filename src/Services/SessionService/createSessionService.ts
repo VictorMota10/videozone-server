@@ -10,7 +10,8 @@ export class createSessionService {
     description: string,
     video_uuid: string,
     token: string,
-    socket_room_uuid: string
+    socket_room_uuid: string,
+    socket_id: string
   ) {
     try {
       const { uuid } = verify(token, process.env.TOKEN_HASH || "") as {
@@ -26,6 +27,7 @@ export class createSessionService {
         uuid,
         video_uuid,
         socket_room_uuid,
+        socket_id
       };
 
       const sessionData = await new SessionRepository().createSession(

@@ -36,7 +36,7 @@ export class UserController {
           email: email,
           country: country,
           birthdate: birthdate,
-          created_at: new Date().toLocaleDateString(),
+          created_at: new Date().toUTCString(),
           username: username,
           firebase_uuid: firebase_uuid,
           avatar_url: request.body.avatar_url || "",
@@ -82,10 +82,9 @@ export class UserController {
       return response.json({
         token: token,
       });
-    }
-    catch (error) {
-      if(error instanceof TokenExpiredError){
-        return response.status(401).end()
+    } catch (error) {
+      if (error instanceof TokenExpiredError) {
+        return response.status(401).end();
       }
       return response.status(400).json(error);
     }

@@ -1,6 +1,7 @@
 import { verify } from "jsonwebtoken";
 import { io } from "../../index";
 import { SessionRepository } from "../../Repositories/SessionRepository";
+import { socketEvents } from "../../utils/events.map";
 
 export class removeUserSessionService {
   async execute(session_uuid: string, user_uuid: string, token: string) {
@@ -16,16 +17,14 @@ export class removeUserSessionService {
         user_uuid
       );
 
-      if (removedUser) {
-        console.log(
-          "dispara evento pra sala toda do usuário: ",
-          removedUser?.socket_room_uuid
+      if (removedUser?.success) {
+        io.to(removedUser?.socket_room_uuid).emit(
+          socketEvents?.removeViewerSession,
+          {
+            user_uuid,
+          }
         );
       }
-
-      //   if (sessionData?.success) {
-      //     io.socketsJoin(socket_room_uuid);
-      //   }
 
       return removedUser?.success;
     } catch (error) {

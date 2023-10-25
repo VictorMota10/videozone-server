@@ -9,6 +9,7 @@ export class SessionRepository {
     uuid,
     video_uuid,
     socket_room_uuid,
+    socket_id,
   }: SessionCreate) {
     const pool = new Pool({
       user: process.env.DB_USER,
@@ -32,8 +33,8 @@ export class SessionRepository {
     }
 
     let query =
-      "INSERT INTO public.sessions_active(session_uuid, currently_video_uuid, title, description, creator_user_uuid, public, created_at)";
-    query += " VALUES ($1, $2, $3, $4, $5, $6, $7)";
+      "INSERT INTO public.sessions_active(session_uuid, currently_video_uuid, title, description, creator_user_uuid, public, created_at, socket_room_uuid) ";
+    query += "VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
 
     let params = [
       sessionUUID,
@@ -43,6 +44,7 @@ export class SessionRepository {
       uuid,
       "1",
       new Date().toUTCString(),
+      socket_room_uuid,
     ];
 
     await pool
@@ -55,16 +57,10 @@ export class SessionRepository {
       });
 
     query =
-      "INSERT INTO public.sessions_viewers(session_uuid, user_uuid, creator, joined_at, socket_room_uuid)";
+      "INSERT INTO public.sessions_viewers(session_uuid, user_uuid, creator, joined_at, socket_id)";
     query += " VALUES ($1, $2, $3, $4, $5)";
 
-    params = [
-      sessionUUID,
-      uuid,
-      "1",
-      new Date().toUTCString(),
-      socket_room_uuid,
-    ];
+    params = [sessionUUID, uuid, "1", new Date().toUTCString(), socket_id];
 
     await pool
       .query(query, params)
@@ -245,7 +241,7 @@ export class SessionRepository {
         });
 
       query =
-        "SELECT U.uuid, U.username, U.avatar_url, SV.creator from public.sessions_viewers SV ";
+        "SELECT U.uuid, U.username, U.avatar_url, SV.creator, SV.socket_id from public.sessions_viewers SV ";
       query += "INNER JOIN public.users U ";
       query += "ON U.uuid = SV.user_uuid ";
       query += "WHERE SV.session_uuid = $1 ";
@@ -273,7 +269,7 @@ export class SessionRepository {
     }
   }
 
-  async joinSession(userUUID: string, sessionUUID: string) {
+  async joinSession(userUUID: string, sessionUUID: string, socketId: string) {
     try {
       const pool = new Pool({
         user: process.env.DB_USER,
@@ -285,14 +281,14 @@ export class SessionRepository {
       pool.connect();
 
       let query =
-        "SELECT SA.creator_user_uuid, SV.user_uuid, SV.socket_room_uuid FROM public.sessions_viewers as SV ";
+        "SELECT SA.creator_user_uuid, SV.user_uuid, SA.socket_room_uuid, SV.socket_id, SV.creator FROM public.sessions_viewers as SV ";
       query += "INNER JOIN public.sessions_active as SA ";
       query += "ON SV.session_uuid = SA.session_uuid ";
       query += "WHERE SA.session_uuid = $1 ";
 
       let params: any = [sessionUUID];
 
-      const sessionData: any[] = await pool
+      const sessionData: any = await pool
         .query(query, params)
         .then((res) => {
           return res.rows;
@@ -305,20 +301,22 @@ export class SessionRepository {
         (value: any) => value?.user_uuid === userUUID
       );
 
+      const hostInfo = sessionData?.filter((value: any) => value?.creator);
+
       if (
         userAlreadyJoined?.length === 0 &&
-        sessionData[0].creator_user_uuid !== userUUID
+        sessionData[0]?.creator_user_uuid !== userUUID
       ) {
         query =
-          "INSERT INTO public.sessions_viewers(session_uuid, user_uuid, creator, joined_at, socket_room_uuid) ";
+          "INSERT INTO public.sessions_viewers(session_uuid, user_uuid, creator, joined_at, socket_id) ";
         query += "VALUES($1, $2, $3, $4, $5)";
 
         params = [
           sessionUUID,
           userUUID,
           "0",
-          new Date(),
-          sessionData[0]?.socket_room_uuid,
+          new Date().toUTCString(),
+          socketId,
         ];
 
         await pool
@@ -346,10 +344,21 @@ export class SessionRepository {
 
         return {
           success: true,
-          socket_room_uuid: sessionData[0].socket_room_uuid,
+          socket_room_uuid: sessionData[0]?.socket_room_uuid,
           already_joined: false,
           avatar_url: avatarUrl?.avatar_url,
+          host_socket_id: hostInfo[0]?.socket_id,
         };
+      } else {
+        query = "UPDATE public.sessions_viewers ";
+        query += "SET socket_id = $1 ";
+        query += "WHERE session_uuid = $2 AND user_uuid = $3 ";
+
+        params = [socketId, sessionUUID, userUUID];
+
+        await pool.query(query, params).catch((err) => {
+          throw new Error(err);
+        });
       }
 
       pool.end();
@@ -358,6 +367,8 @@ export class SessionRepository {
         success: true,
         already_joined: true,
         socket_room_uuid: sessionData[0].socket_room_uuid,
+        host_socket_id: hostInfo[0]?.socket_id,
+        is_host: sessionData[0]?.creator_user_uuid === userUUID,
       };
     } catch (error) {
       console.error(error);
@@ -414,9 +425,11 @@ export class SessionRepository {
       });
       pool.connect();
 
-      let query = "SELECT socket_room_uuid FROM public.sessions_viewers ";
+      let query = "SELECT SA.socket_room_uuid FROM public.sessions_viewers SV ";
+      query += "INNER JOIN public.sessions_active SA ";
+      query += "ON SA.session_uuid = SV.session_uuid ";
       query +=
-        "WHERE session_uuid = $1 AND user_uuid = $2 AND creator = 'false' ";
+        "WHERE SV.session_uuid = $1 AND SV.user_uuid = $2 AND SV.creator = 'false' ";
 
       let params = [session_uuid, user_uuid];
 
@@ -426,8 +439,20 @@ export class SessionRepository {
           return res.rows[0];
         })
         .catch((err) => {
+          console.log(err);
           throw new Error(err);
         });
+
+      query =
+        "INSERT INTO public.black_list_sessions_viewers(session_uuid, user_uuid) ";
+      query +=
+        "SELECT $1, $2 WHERE NOT EXISTS ( SELECT session_uuid, user_uuid FROM public.black_list_sessions_viewers WHERE session_uuid = $3 AND user_uuid = $4 ) ";
+
+      params = [session_uuid, user_uuid, session_uuid, user_uuid];
+
+      await pool.query(query, params).catch((err) => {
+        throw new Error(err);
+      });
 
       query = "DELETE FROM public.sessions_viewers ";
       query +=
@@ -444,34 +469,15 @@ export class SessionRepository {
           throw new Error(err);
         });
 
-      if (removed) {
-        query =
-          "INSERT INTO public.black_list_sessions_viewers(session_uuid, user_uuid) ";
-        query +=
-          "SELECT $1, $2 WHERE NOT EXISTS ( SELECT session_uuid, user_uuid FROM public.black_list_sessions_viewers WHERE session_uuid = $3 AND user_uuid = $4 ) ";
-
-        params = [session_uuid, user_uuid, session_uuid, user_uuid];
-
-        const response = await pool
-          .query(query, params)
-          .then(() => {
-            return {
-              success: true,
-              socket_room_uuid: sessionData?.socket_room_uuid,
-            };
-          })
-          .catch((err) => {
-            throw new Error(err);
-          });
-
-        return response;
-      }
-
       pool.end();
 
-      return {
-        success: false,
-      };
+      if (removed)
+        return {
+          success: true,
+          socket_room_uuid: sessionData?.socket_room_uuid,
+        };
+
+      return { success: false };
     } catch (error) {
       return error;
     }

@@ -4,7 +4,7 @@ import { io } from "../../index";
 import { socketEvents } from "../../utils/events.map";
 
 export class joinSessionService {
-  async execute(token: string, sessionUUID: string) {
+  async execute(token: string, sessionUUID: string, socketId: string) {
     try {
       const { uuid, username } = verify(
         token,
@@ -27,7 +27,8 @@ export class joinSessionService {
 
       const joinSession: any = await new SessionRepository().joinSession(
         userUUID,
-        sessionUUID
+        sessionUUID,
+        socketId
       );
 
       io.socketsJoin(joinSession?.socket_room_uuid);
@@ -40,6 +41,15 @@ export class joinSessionService {
             username,
             creator: false,
             avatar_url: joinSession?.avatar_url || undefined,
+          }
+        );
+      }
+
+      if (!joinSession?.is_host) {
+        io.to(joinSession?.host_socket_id).emit(
+          socketEvents.getCurrentTimeOfVideoSession,
+          {
+            from: socketId,
           }
         );
       }

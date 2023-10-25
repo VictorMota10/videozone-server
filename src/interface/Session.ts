@@ -5,4 +5,5 @@ export interface SessionCreate {
   video_uuid: string;
   uuid: string;
   socket_room_uuid: string
+  socket_id: string
 }

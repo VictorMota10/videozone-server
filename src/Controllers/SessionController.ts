@@ -12,7 +12,7 @@ import { removeUserSessionService } from "../Services/SessionService/removeUserS
 export class SessionController {
   async createSession(request: Request, response: Response) {
     try {
-      const { video_uuid, title, description } = request.body;
+      const { video_uuid, title, description, socket_id } = request.body;
 
       const validation = validatorRequired(request.body, [
         "title",
@@ -33,7 +33,8 @@ export class SessionController {
         description,
         video_uuid,
         token,
-        socket_room_uuid
+        socket_room_uuid,
+        socket_id
       );
 
       if (sessionCreated?.success === false) {
@@ -63,6 +64,8 @@ export class SessionController {
     try {
       const { session_uuid } = request.params;
 
+      const socket_id: any = request.headers?.socketid;
+
       const authToken: string = request.headers.authorization || "";
       const [, token] = authToken.split(" ");
 
@@ -75,10 +78,10 @@ export class SessionController {
           error: "Sessão não encontrada...",
         });
       }
-
       const joinSession: any = await new joinSessionService().execute(
         token,
-        session_uuid
+        session_uuid,
+        socket_id
       );
 
       const data: any = await new getSessionDataService().execute(session_uuid);
@@ -86,6 +89,7 @@ export class SessionController {
       if (joinSession) {
         return response.json(data);
       }
+      return;
     } catch (error: any) {
       return response.status(400).json(responseErrorGenerator(error, 400));
     }
