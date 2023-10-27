@@ -222,7 +222,7 @@ export class SessionRepository {
       pool.connect();
 
       let query =
-        "SELECT SA.session_uuid, SA.currently_video_uuid, SA.title, SA.description, SA.created_at, SA.creator_user_uuid, V.video_url, C.name, C.logo_url FROM public.sessions_active SA";
+        "SELECT SA.session_uuid, SA.currently_video_uuid, SA.title, SA.description, SA.created_at, SA.creator_user_uuid, SA.socket_room_uuid, V.video_url, C.name, C.logo_url FROM public.sessions_active SA";
       query += " INNER JOIN public.videos V";
       query += " ON V.video_uuid_firebase = SA.currently_video_uuid";
       query += " INNER JOIN public.channel C";

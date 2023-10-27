@@ -41,6 +41,14 @@ io.on("connection", (client: any) => {
   client.on(socketEvents.responseTimeVideo, (data: any) => {
     io.to(data.to).emit(socketEvents.currentTimeOfVideo, {
       current_time: data.current_time,
+      playing: data.playing,
+    });
+  });
+
+  client.on(socketEvents.receiveEventChangeStatus, (data: any) => {
+    io.emit(socketEvents.sendEventChangeStatus, {
+      session_uuid: data.session_uuid,
+      event: data.event,
     });
   });
 
