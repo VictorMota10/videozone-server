@@ -8,6 +8,7 @@ import { joinSessionService } from "../Services/SessionService/joinSessionServic
 
 import { v4 as uuidv4 } from "uuid";
 import { removeUserSessionService } from "../Services/SessionService/removeUserService";
+import { getViewersService } from "../Services/SessionService/getViewersService";
 
 export class SessionController {
   async createSession(request: Request, response: Response) {
@@ -109,6 +110,20 @@ export class SessionController {
       );
 
       return response.json(removedUser);
+    } catch (error: any) {
+      return response.status(400).json(responseErrorGenerator(error, 400));
+    }
+  }
+
+  async getViewers(request: Request, response: Response){
+    try {
+      const { session_uuid } = request.params
+
+      const viewers: any = await new getViewersService().execute(
+        session_uuid,
+      );
+
+      return response.json(viewers);
     } catch (error: any) {
       return response.status(400).json(responseErrorGenerator(error, 400));
     }

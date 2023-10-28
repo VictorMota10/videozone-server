@@ -2,12 +2,12 @@ import { SessionRepository } from "../../Repositories/SessionRepository";
 
 export class getSessionDataService {
   async execute(
-    sessionUUID: string,
+    session_uuid: string,
   ) {
     try {
 
       let sessionData = await new SessionRepository().getSessionData(
-        sessionUUID
+        session_uuid
       );
 
       return sessionData;
@@ -17,12 +17,12 @@ export class getSessionDataService {
   }
 
   async exists(
-    sessionUUID: string,
+    session_uuid: string,
   ) {
     try {
 
       let sessionData: any = await new SessionRepository().sessionExists(
-        sessionUUID
+        session_uuid
       );
 
       return sessionData;

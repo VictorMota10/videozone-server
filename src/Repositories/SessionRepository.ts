@@ -3,7 +3,7 @@ import { SessionCreate } from "../interface/Session";
 
 export class SessionRepository {
   async createSession({
-    sessionUUID,
+    session_uuid,
     title,
     description = "",
     uuid,
@@ -37,7 +37,7 @@ export class SessionRepository {
     query += "VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
 
     let params = [
-      sessionUUID,
+      session_uuid,
       video_uuid,
       title,
       description,
@@ -60,7 +60,7 @@ export class SessionRepository {
       "INSERT INTO public.sessions_viewers(session_uuid, user_uuid, creator, joined_at, socket_id)";
     query += " VALUES ($1, $2, $3, $4, $5)";
 
-    params = [sessionUUID, uuid, "1", new Date().toUTCString(), socket_id];
+    params = [session_uuid, uuid, "1", new Date().toUTCString(), socket_id];
 
     await pool
       .query(query, params)
@@ -75,7 +75,7 @@ export class SessionRepository {
       "SELECT session_uuid, currently_video_uuid, title, description, created_at, creator_user_uuid from public.sessions_active ";
     query += "WHERE session_uuid = $1";
 
-    params = [sessionUUID];
+    params = [session_uuid];
 
     const sessionData = await pool
       .query(query, params)
@@ -190,7 +190,7 @@ export class SessionRepository {
         query += "WHERE session_uuid = $1";
       }
 
-      params = [session_uuid];
+      params = [sessionUUID];
 
       const removeOnActive = await pool
         .query(query, params)
@@ -210,7 +210,7 @@ export class SessionRepository {
     }
   }
 
-  async getSessionData(sessionUUID: string) {
+  async getSessionData(session_uuid: string) {
     try {
       const pool = new Pool({
         user: process.env.DB_USER,
@@ -229,7 +229,7 @@ export class SessionRepository {
       query += " ON V.channel_id = C.Id";
       query += " WHERE session_uuid = $1";
 
-      let params = [sessionUUID];
+      let params = [session_uuid];
 
       const sessionData = await pool
         .query(query, params)
@@ -269,7 +269,7 @@ export class SessionRepository {
     }
   }
 
-  async joinSession(userUUID: string, sessionUUID: string, socketId: string) {
+  async joinSession(user_uuid: string, session_uuid: string, socketId: string) {
     try {
       const pool = new Pool({
         user: process.env.DB_USER,
@@ -286,7 +286,7 @@ export class SessionRepository {
       query += "ON SV.session_uuid = SA.session_uuid ";
       query += "WHERE SA.session_uuid = $1 ";
 
-      let params: any = [sessionUUID];
+      let params: any = [session_uuid];
 
       const sessionData: any = await pool
         .query(query, params)
@@ -298,22 +298,22 @@ export class SessionRepository {
         });
 
       const userAlreadyJoined = sessionData?.filter(
-        (value: any) => value?.user_uuid === userUUID
+        (value: any) => value?.user_uuid === user_uuid
       );
 
       const hostInfo = sessionData?.filter((value: any) => value?.creator);
 
       if (
         userAlreadyJoined?.length === 0 &&
-        sessionData[0]?.creator_user_uuid !== userUUID
+        sessionData[0]?.creator_user_uuid !== user_uuid
       ) {
         query =
           "INSERT INTO public.sessions_viewers(session_uuid, user_uuid, creator, joined_at, socket_id) ";
         query += "VALUES($1, $2, $3, $4, $5)";
 
         params = [
-          sessionUUID,
-          userUUID,
+          session_uuid,
+          user_uuid,
           "0",
           new Date().toUTCString(),
           socketId,
@@ -331,7 +331,7 @@ export class SessionRepository {
         query = "SELECT U.avatar_url FROM public.users U ";
         query += "WHERE U.uuid = $1 ";
 
-        params = [userUUID];
+        params = [user_uuid];
 
         const avatarUrl = await pool
           .query(query, params)
@@ -354,7 +354,7 @@ export class SessionRepository {
         query += "SET socket_id = $1 ";
         query += "WHERE session_uuid = $2 AND user_uuid = $3 ";
 
-        params = [socketId, sessionUUID, userUUID];
+        params = [socketId, session_uuid, user_uuid];
 
         await pool.query(query, params).catch((err) => {
           throw new Error(err);
@@ -368,7 +368,7 @@ export class SessionRepository {
         already_joined: true,
         socket_room_uuid: sessionData[0].socket_room_uuid,
         host_socket_id: hostInfo[0]?.socket_id,
-        is_host: sessionData[0]?.creator_user_uuid === userUUID,
+        is_host: sessionData[0]?.creator_user_uuid === user_uuid,
       };
     } catch (error) {
       console.error(error);
@@ -376,7 +376,7 @@ export class SessionRepository {
     }
   }
 
-  async sessionExists(sessionUUID: string) {
+  async sessionExists(session_uuid: string) {
     try {
       const pool = new Pool({
         user: process.env.DB_USER,
@@ -390,7 +390,7 @@ export class SessionRepository {
       let query =
         "SELECT session_uuid FROM public.sessions_active WHERE session_uuid = $1 ";
 
-      let params = [sessionUUID];
+      let params = [session_uuid];
 
       const exists = await pool
         .query(query, params)
@@ -546,6 +546,43 @@ export class SessionRepository {
       pool.end();
 
       return sessionBlackList?.length === 0;
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
+  }
+
+  async getViewers(session_uuid: string) {
+    try {
+      const pool = new Pool({
+        user: process.env.DB_USER,
+        host: process.env.DB_HOST,
+        database: process.env.DATABASE,
+        password: process.env.DB_PASSWORD,
+        port: parseInt(process.env.DB_PORT || ""),
+      });
+      pool.connect();
+
+      let query =
+        "SELECT U.uuid, U.username, U.avatar_url, SV.creator, SV.socket_id from public.sessions_viewers SV ";
+      query += "INNER JOIN public.users U ";
+      query += "ON U.uuid = SV.user_uuid ";
+      query += "WHERE SV.session_uuid = $1 AND SV.creator = false ";
+
+      let params = [session_uuid];
+
+      const viewers = await pool
+        .query(query, params)
+        .then((res) => {
+          return res.rows;
+        })
+        .catch((err) => {
+          throw new Error(err);
+        });
+
+      pool.end();
+      
+      return viewers;
     } catch (error) {
       console.error(error);
       return error;

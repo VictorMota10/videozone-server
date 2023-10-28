@@ -2,12 +2,12 @@ import { SessionRepository } from "../../Repositories/SessionRepository";
 
 export class inactivateSessionService {
   async execute(
-    sessionUUID: string,
+    session_uuid: string,
   ) {
     try {
 
       const sessionInactivated = await new SessionRepository().inactivateSession(
-        sessionUUID
+        session_uuid
       );
 
       return sessionInactivated;

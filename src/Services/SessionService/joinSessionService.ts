@@ -4,7 +4,7 @@ import { io } from "../../index";
 import { socketEvents } from "../../utils/events.map";
 
 export class joinSessionService {
-  async execute(token: string, sessionUUID: string, socketId: string) {
+  async execute(token: string, session_uuid: string, socketId: string) {
     try {
       const { uuid, username } = verify(
         token,
@@ -14,11 +14,11 @@ export class joinSessionService {
         username: string;
       };
 
-      const userUUID = uuid;
+      const user_uuid = uuid;
 
       const canJoin = await new SessionRepository().verifyUserCanJoin(
-        sessionUUID,
-        userUUID
+        session_uuid,
+        user_uuid
       );
 
       if (!canJoin) {
@@ -26,8 +26,8 @@ export class joinSessionService {
       }
 
       const joinSession: any = await new SessionRepository().joinSession(
-        userUUID,
-        sessionUUID,
+        user_uuid,
+        session_uuid,
         socketId
       );
 

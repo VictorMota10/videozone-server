@@ -1,5 +1,5 @@
 export interface SessionCreate {
-  sessionUUID: string;
+  session_uuid: string;
   title: string;
   description?: string;
   video_uuid: string;

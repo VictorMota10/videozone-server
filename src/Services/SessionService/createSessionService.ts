@@ -18,10 +18,10 @@ export class createSessionService {
         uuid: string;
       };
 
-      const sessionUUID = uuidV4();
+      const session_uuid = uuidV4();
 
       const sessionDataCreate = {
-        sessionUUID,
+        session_uuid,
         title,
         description,
         uuid,
