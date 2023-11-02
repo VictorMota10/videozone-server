@@ -567,7 +567,7 @@ export class SessionRepository {
         "SELECT U.uuid, U.username, U.avatar_url, SV.creator, SV.socket_id from public.sessions_viewers SV ";
       query += "INNER JOIN public.users U ";
       query += "ON U.uuid = SV.user_uuid ";
-      query += "WHERE SV.session_uuid = $1 AND SV.creator = false ";
+      query += "WHERE SV.session_uuid = $1 ";
 
       let params = [session_uuid];
 
@@ -581,7 +581,7 @@ export class SessionRepository {
         });
 
       pool.end();
-      
+
       return viewers;
     } catch (error) {
       console.error(error);

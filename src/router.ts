@@ -122,7 +122,6 @@ router.put(
   authToken,
   sessionController.removeUserSession
 );
-
 router.get(
   "/session/viewers/:session_uuid",
   authToken,

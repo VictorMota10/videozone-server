@@ -2,6 +2,7 @@ import { verify } from "jsonwebtoken";
 import { SessionRepository } from "../../Repositories/SessionRepository";
 import { io } from "../../index";
 import { socketEvents } from "../../utils/events.map";
+import { v4 as uuidV4 } from "uuid";
 
 export class joinSessionService {
   async execute(token: string, session_uuid: string, socketId: string) {
@@ -34,7 +35,7 @@ export class joinSessionService {
       io.socketsJoin(joinSession?.socket_room_uuid);
 
       if (!joinSession?.already_joined) {
-        io.to(joinSession?.socket_room_uuid).emit(
+        io.emit(
           socketEvents.newViewerSession,
           {
             uuid,

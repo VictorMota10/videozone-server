@@ -18,12 +18,21 @@ export class removeUserSessionService {
       );
 
       if (removedUser?.success) {
-        io.to(removedUser?.socket_room_uuid).emit(
-          socketEvents?.removeViewerSession,
-          {
-            user_uuid,
-          }
-        );
+        if (user_uuid !== uuid) {
+          io.to(removedUser?.socket_room_uuid).emit(
+            socketEvents?.removeViewerSession,
+            {
+              user_uuid,
+            }
+          );
+        } else {
+          io.to(removedUser?.socket_room_uuid).emit(
+            socketEvents?.viewerLeftSession,
+            {
+              user_uuid,
+            }
+          );
+        }
       }
 
       return removedUser?.success;

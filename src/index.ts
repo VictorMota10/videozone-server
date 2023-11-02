@@ -52,8 +52,13 @@ io.on("connection", (client: any) => {
     });
   });
 
+  client.on(socketEvents.hostChangeVideoTime, (data: any) => {
+    io.to(data?.room).emit(socketEvents.videoCurrentTimeUpdated, {
+      current_time: data?.current_time,
+    });
+  });
+
   client.on("disconnect", () => {
-    console.log("disconnect: ", client.id);
     delete clients[client.id];
   });
 });

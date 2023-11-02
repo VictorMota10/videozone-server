@@ -115,12 +115,12 @@ export class SessionController {
     }
   }
 
-  async getViewers(request: Request, response: Response){
+  async getViewers(request: Request, response: Response) {
     try {
-      const { session_uuid } = request.params
+      const { session_uuid } = request.params;
 
       const viewers: any = await new getViewersService().execute(
-        session_uuid,
+        session_uuid
       );
 
       return response.json(viewers);
